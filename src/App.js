@@ -7,7 +7,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const API_URL = "https://love-bug-out-backend-1.onrender.com/api/pest/analyze";
+  const API_URL = "https://test-love-bug-out-backend.onrender.com/api/pest/analyze";
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
