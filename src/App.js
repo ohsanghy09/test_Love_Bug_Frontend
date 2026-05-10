@@ -1,31 +1,59 @@
 import { useState } from "react";
 
 function App() {
+
+  // 이미지 상태 저장 변수
   const [imageFile, setImageFile] = useState(null);
+
+  // 이미지 URL 상태 저장 변수
   const [previewUrl, setPreviewUrl] = useState("");
+
+
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const API_URL = "https://love-bug-out-backend-1.onrender.com/api/pest/analyze";
+  const API_URL = "https://test-love-bug-out-backend.onrender.com/api/pest/analyze";
 
   const handleImageChange = (event) => {
+
+    // 선택된 이미지 file로 가져오기
     const file = event.target.files[0];
 
+    // file이 없으면 함수 종료
     if (!file) {
       return;
     }
 
+    // 만약 파일의 이름이 image가 아닌 걸로 시작하면 실행
     if (!file.type.startsWith("image/")) {
+
+      // 에러메시지 상태 변환
       setErrorMessage("이미지 파일만 업로드할 수 있습니다.");
+
+      // 이미지 파일 제거
       setImageFile(null);
+
+      // 이미지 URL 제거
       setPreviewUrl("");
+
+      // 함수 종료
       return;
     }
 
+
+// 만약 image값이 정상이면
+
+    //  imageFile에 상태 저장 -> 백엔드로 보내주기 위함
     setImageFile(file);
+
+    // URl을 내부 URL로 바꿔서 저장(src) -> 화면 표시
     setPreviewUrl(URL.createObjectURL(file));
+
+    // 결과 상태 저장 함수 null -> 새로 사진 올렸으니까 이전 결과 제거
     setResult(null);
+
+    // 이전 에러메시지 제거
     setErrorMessage("");
   };
 
