@@ -133,6 +133,7 @@ function App() {
     }
   };
 
+  // 상태 변환 변수 초기화 함수
   const handleReset = () => {
     setImageFile(null);
     setPreviewUrl("");
