@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 function App() {
 
@@ -7,6 +7,9 @@ function App() {
 
   // 이미지 URL 상태 저장 변수
   const [previewUrl, setPreviewUrl] = useState("");
+
+  // 파일 이미지 선택 연결
+  const fileInputRef = useRef(null);
 
   // 백엔드에서 결과 상태 저장 변수
   const [result, setResult] = useState(null);
@@ -49,7 +52,7 @@ function App() {
     }
 
 
-// 만약 image값이 정상이면
+    // 만약 image값이 정상이면
 
     //  imageFile에 상태 저장 -> 백엔드로 보내주기 위함
     setImageFile(file);
@@ -114,6 +117,7 @@ function App() {
         throw new Error(data.message || "이미지 분석 요청에 실패했습니다.");
       }
 
+      // 만약 response.ok이면 상태 저장 변수에 객체 저장
       setResult(data);
 
 
@@ -135,10 +139,18 @@ function App() {
 
   // 상태 변환 변수 초기화 함수
   const handleReset = () => {
-    setImageFile(null);
-    setPreviewUrl("");
-    setResult(null);
-    setErrorMessage("");
+
+    setImageFile(null); // 현재 저장 이미지
+    setPreviewUrl("");  // 현재 저장 이미지 생성 URL
+    setResult(null);  // 현재 백엔드 결과값
+    setErrorMessage(""); // 현재 에러 메시지
+
+    // 현재 fileInputRef의 값이 존재하면
+    if (fileInputRef.current.value) {
+
+      // 값을 비우기
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -146,25 +158,39 @@ function App() {
       <div style={styles.container}>
         <h1 style={styles.title}>해충 이미지 분석</h1>
 
+        {/* 위 출력 문구 */}
         <p style={styles.description}>
           이미지를 업로드하면 AI가 사진을 분석하여 해충 출현 가능성, 위험도,
           판단 근거, 행동 안내를 제공합니다.
         </p>
 
+        {/* 이미지 업로드 영역 */}
         <div style={styles.section}>
           <label style={styles.label}>이미지 업로드</label>
 
           <input
+            // 해당 input을 fileInputRef와 연결
+            ref={fileInputRef}
+
+            // input을 file 선택 버튼으로 변경  
             type="file"
+
+            // 이미지 파일로 선택 제한
             accept="image/*"
+
+            // 사용자가 파일 선택했을 때(값이 변경 됐을 때) 함수 실행
             onChange={handleImageChange}
             style={styles.fileInput}
           />
         </div>
 
+
+        {/* 업로드 이미지 미리보기 */}
+        {/* previewUrl이 있을 경우 오른쪽 jsx를 화면에 출력 / 왼쪽 previewUrl은 조건문 */}
         {previewUrl && (
           <div style={styles.previewBox}>
             <img
+              // 임의로 생성한 URL을 넣은 상태 저장 변수를 이미지 화면에 출력
               src={previewUrl}
               alt="업로드 이미지 미리보기"
               style={styles.previewImage}
@@ -172,22 +198,30 @@ function App() {
           </div>
         )}
 
+        {/* 분석하기 및 초기화 버튼 */}
         <div style={styles.buttonGroup}>
+
+          {/* 분석하기 버튼 */}
           <button
-            type="button"
+
+            // 클릭 시 함수 실행
             onClick={handleAnalyze}
+
+            // loading이 true면 버튼 비활성화
             disabled={loading}
+
+
             style={{
               ...styles.primaryButton,
-              opacity: loading ? 0.6 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1, // loading이 true ? 투명도 0.6 : 아니면 1
+              cursor: loading ? "not-allowed" : "pointer", // loading이 true ? 클릭불가커서 : 손가락
             }}
           >
             {loading ? "분석 중..." : "분석하기"}
           </button>
 
+          {/* 초기화 버튼 */}
           <button
-            type="button"
             onClick={handleReset}
             disabled={loading}
             style={styles.secondaryButton}
@@ -196,8 +230,12 @@ function App() {
           </button>
         </div>
 
+
+        {/* 상태변수(errorMessage)에 에러메시지 존재하면 화면에 출력 */}
         {errorMessage && <div style={styles.errorBox}>{errorMessage}</div>}
 
+
+        {/* 상태변수(result)에 백엔드에서 받는 분석결과가 존재한다면 화면에 출력 */}
         {result && (
           <div style={styles.resultBox}>
             <h2 style={styles.resultTitle}>분석 결과</h2>
@@ -243,12 +281,6 @@ function App() {
               </p>
             </div>
 
-            <details style={styles.rawJsonBox}>
-              <summary style={styles.rawJsonSummary}>원본 JSON 보기</summary>
-              <pre style={styles.rawJsonText}>
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            </details>
           </div>
         )}
       </div>
@@ -256,6 +288,7 @@ function App() {
   );
 }
 
+// 요청 상태 컴포넌트
 function ResultItem({ label, value }) {
   return (
     <div style={styles.resultItem}>
@@ -265,6 +298,7 @@ function ResultItem({ label, value }) {
   );
 }
 
+// 위험도 조건 확인 함수
 function convertRiskLevel(riskLevel) {
   if (riskLevel === "low") return "낮음";
   if (riskLevel === "medium") return "보통";
@@ -272,21 +306,30 @@ function convertRiskLevel(riskLevel) {
   return riskLevel || "알 수 없음";
 }
 
+// 신뢰도 출력 함수
 function formatConfidence(confidence) {
+
+  // 숫자로 변환
   const numberConfidence = Number(confidence);
 
+  // numberConfidence가 숫자인지 확인 
   if (Number.isNaN(numberConfidence)) {
     return "알 수 없음";
   }
 
+  // 0.95를 *100 하고 추가적인 소숫점 자리가 있을 시 올림
   return `${Math.round(numberConfidence * 100)}%`;
 }
 
+// 해충 배열 확인
 function formatPestTypes(pestTypes) {
+
+  // 만약 배열이 아니거나 백엔드로 받은 배열의 length가 0이면 없음 리턴
   if (!Array.isArray(pestTypes) || pestTypes.length === 0) {
     return "없음";
   }
 
+  // 배열이 맞고 이상이 없다면 배열에 ,로 구분해서 리턴
   return pestTypes.join(", ");
 }
 
@@ -300,7 +343,7 @@ const styles = {
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif",
   },
   container: {
-    maxWidth: "640px",
+    maxWidth: "700px",
     margin: "0 auto",
     padding: "28px",
     backgroundColor: "#ffffff",

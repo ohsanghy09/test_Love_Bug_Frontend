@@ -2,16 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
+// public-index.html <div id="root"></div>을 가져와 
+// React 앱을 렌더링할 수 있는 루트 공간 생성 (도화지)
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// root를 화면에 렌더링
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
