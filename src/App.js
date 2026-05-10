@@ -97,6 +97,7 @@ function App() {
       formData.append("image", imageFile);
 
       // 비동기로 API_URL에 formData를 body에 싫어 보냄(POST) -> 결과 response로 받음
+      // await 사용으로 비동기 설정
       const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
