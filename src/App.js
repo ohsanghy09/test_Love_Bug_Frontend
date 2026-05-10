@@ -8,13 +8,20 @@ function App() {
   // 이미지 URL 상태 저장 변수
   const [previewUrl, setPreviewUrl] = useState("");
 
-
+  // 백엔드에서 결과 상태 저장 변수
   const [result, setResult] = useState(null);
+
+  // 로딩 상태 저장 변수
   const [loading, setLoading] = useState(false);
+
+  // 에러 메시지 상태 저장 변수
   const [errorMessage, setErrorMessage] = useState("");
 
+  // 백엔드 API_URL
   const API_URL = "https://test-love-bug-out-backend.onrender.com/api/pest/analyze";
 
+
+  // 이미지 업로드 함수
   const handleImageChange = (event) => {
 
     // 선택된 이미지 file로 가져오기
@@ -57,38 +64,70 @@ function App() {
     setErrorMessage("");
   };
 
+
+  // 분석하기 함수 (async로 비동기 설정)
   const handleAnalyze = async () => {
+
+    // 만약 imgeFile 상태 저장 함수에 아무 값이 없으면
     if (!imageFile) {
+
+      // errorMessage 상태 저장 값 변경
       setErrorMessage("분석할 이미지를 선택해주세요.");
+
+      // 함수 종료
       return;
     }
 
+    // 일단 실행
     try {
+
+      // loading 상태 저장 변수 true로 변환
       setLoading(true);
+
+      // 에러메시지 초기화
       setErrorMessage("");
+
+      // 이전 백엔드 결과 초기화
       setResult(null);
 
+      // 백엔드로 데이터를 보내기 위한 객체 생성
       const formData = new FormData();
 
-      // 백엔드의 upload.single("image")와 반드시 이름이 같아야 함
+      // 백엔드의 image와 같은 이름으로 imageFile 상태 저장
       formData.append("image", imageFile);
 
+      // 비동기로 API_URL에 formData를 body에 싫어 보냄(POST) -> 결과 response로 받음
       const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
       });
 
+      // 백엔드 결과값 json으로 변환 -> 실제로 사용하기 위한 용도
       const data = await response.json();
 
+      // response ok(true)이 아니면 
       if (!response.ok) {
+
+        // 일부로 에러 발생시켜서 catch로 throw
+        // data.message가 있으면 data.massage 사용 아니면 || 문구 사용
         throw new Error(data.message || "이미지 분석 요청에 실패했습니다.");
       }
 
       setResult(data);
+
+
+      // 앞에서 던진 new Error의 error
     } catch (error) {
+
+      // error 출력
       console.error("분석 오류:", error);
+
+      // error 메시지를 상태 저장 변수에 저장(값 존재 확인 후 사용 또는 미사용 || 존재하지 않으면 사용)
       setErrorMessage(error.message || "알 수 없는 오류가 발생했습니다.");
+
+      // 에러가 발생해도 마지막에는 무조건 실행
     } finally {
+      // loading 상태 변수 false로 설정 -> 분석 끝났으니까 돌리지 말라고.
       setLoading(false);
     }
   };
